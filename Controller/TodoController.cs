@@ -18,12 +18,12 @@ namespace dotnet_practice.Controller
 
         [HttpGet]
         [Route("GetData")]
-        public IEnumerable<Todo> GetData([FromQuery]bool? history=null)
+        public IEnumerable<Todo> GetData([FromQuery] bool? history = null)
         {
             using var connection = DBContext.GetConnection();
 
-              var  sql=$"SELECT * FROM todo {(history==null ? "" : "where completed=@history")} order by id ";
-            var TodoDetails = connection.Query<Todo>(sql,new{history});
+            var sql = $"SELECT * FROM todo {(history == null ? "" : "where completed=@history")} order by id ";
+            var TodoDetails = connection.Query<Todo>(sql, new { history });
 
             return TodoDetails;
         }
@@ -32,15 +32,16 @@ namespace dotnet_practice.Controller
         //GET single product
         [HttpGet]
         [Route("GetById/{Id}")]
-        public IActionResult GetById(int Id){
-            using var connection=DBContext.GetConnection();
-            var sql="SELECT * FROM todo where id=@id";
-          
-            var result=connection.QuerySingleOrDefault<Todo>(sql,new{id=Id});
-            if(result==null)
-             return NotFound("Product not found");
+        public IActionResult GetById(int Id)
+        {
+            using var connection = DBContext.GetConnection();
+            var sql = "SELECT * FROM todo where id=@id";
+
+            var result = connection.QuerySingleOrDefault<Todo>(sql, new { id = Id });
+            if (result == null)
+                return NotFound("Product not found");
             return Ok(result);
-           
+
         }
 
 
@@ -48,75 +49,82 @@ namespace dotnet_practice.Controller
         [Route("AddTodo")]
         public IActionResult AddTodo([FromBody] Todo todo)
         {
-            if(todo==null)
+            if (todo == null)
             {
                 return BadRequest("Todo required");
             }
-            using var connection=DBContext.GetConnection();
-            var sql="INSERT INTO Todo(task,completed,createdAt,completedAt)values(@Task,@Completed,@CreatedAt,@CompletedAt)";
-            var result=connection.Execute(sql,new{
-                task=todo.Task,
-                completed=todo.Completed,
-                createdAt=todo.CreatedAt,
-                completedAt=todo.CompletedAt
+            using var connection = DBContext.GetConnection();
+            var sql = "INSERT INTO Todo(task,completed,createdAt,completedAt)values(@Task,@Completed,@CreatedAt,@CompletedAt)";
+            var result = connection.Execute(sql, new
+            {
+                task = todo.Task,
+                completed = todo.Completed,
+                createdAt = todo.CreatedAt,
+                completedAt = todo.CompletedAt
 
             });
-            if(result>0)
+            if (result > 0)
             {
                 return Ok("Todo Added");
             }
-            return StatusCode(500,"Failed to add todo");
+            return StatusCode(500, "Failed to add todo");
 
         }
         [HttpPut]
         [Route("UpdateTodo")]
-        public IActionResult UpdateTodo([FromBody]Todo todo){
-            if(todo==null)
-             return BadRequest("TodoDetails not found");
-             try{
-                Console.WriteLine(todo);
-            using var connection=DBContext.GetConnection();
-            var sql="UPDATE todo SET task=@task,completed=@completed,completedAt=@completedAt where id=@id";
-            var result=connection.Execute(sql,new{
-                id=todo.Id,
-                task=todo.Task,
-                completed=todo.Completed,
-                completedAt=todo.CompletedAt
-
-            });
-          if(result>0)
+        public IActionResult UpdateTodo([FromBody] Todo todo)
+        {
+            if (todo == null)
+                return BadRequest("TodoDetails not found");
+            try
             {
-                return Ok("Todo updated");
+                using var connection = DBContext.GetConnection();
+                var sql = "UPDATE todo SET task=@task,completed=@completed,completedAt=@completedAt where id=@id";
+                var result = connection.Execute(sql, new
+                {
+                    id = todo.Id,
+                    task = todo.Task,
+                    completed = todo.Completed,
+                    completedAt = todo.CompletedAt
+
+                });
+                if (result > 0)
+                {
+                    return Ok("Todo updated");
+                }
+                return StatusCode(500, "Failed to add todo");
             }
-            return StatusCode(500,"Failed to add todo");
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error" + ex);
+            }
         }
-        catch(Exception ex){
-            return StatusCode(500,"Internal server error"+ex);
-        }
-        }
-        
+
 
         [HttpDelete]
         [Route("DeleteTask/{Id}")]
-        public IActionResult DeleteTask(int Id){
-           // var StringId=Id.ToString();
-            try{
-                using var connection=DBContext.GetConnection();
-                 var sql="DELETE FROM todo WHERE id=@Id";
-                 var result=connection.Execute(sql,new
-                 { id=Id}
-                 );
-                 if(result>0)
-                 {
+        public IActionResult DeleteTask(int Id)
+        {
+            // var StringId=Id.ToString();
+            try
+            {
+                using var connection = DBContext.GetConnection();
+                var sql = "DELETE FROM todo WHERE id=@Id";
+                var result = connection.Execute(sql, new
+                { id = Id }
+                );
+                if (result > 0)
+                {
                     return Ok("Successfully deleted");
-                 }
+                }
 
-                 return NotFound("Todo not found");
+                return NotFound("Todo not found");
             }
-             catch(Exception ex){
-                return StatusCode(500,"Internal server error");
-             }    
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
-        
+
     }
 }
