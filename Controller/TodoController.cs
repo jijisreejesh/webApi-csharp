@@ -22,8 +22,9 @@ namespace dotnet_practice.Controller
         {
             using var connection = DBContext.GetConnection();
 
-              var  sql=$"SELECT * FROM todo {(history==null ? "" : "where completed=@history")}";
+              var  sql=$"SELECT * FROM todo {(history==null ? "" : "where completed=@history")} order by id ";
             var TodoDetails = connection.Query<Todo>(sql,new{history});
+
             return TodoDetails;
         }
 
