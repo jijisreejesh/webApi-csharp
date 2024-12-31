@@ -6,6 +6,8 @@ using Npgsql;
 using System;
 using Dapper;
 using System.Security.AccessControl;
+using Microsoft.Extensions.ObjectPool;
+using Microsoft.VisualBasic;
 
 namespace dotnet_practice.Controller
 {
@@ -15,13 +17,16 @@ namespace dotnet_practice.Controller
     {
 
         [HttpGet]
-        [Route("getData")]
-        public IEnumerable<Todo> Get(bool history=false)
+        [Route("GetData")]
+        public IEnumerable<Todo> GetData([FromQuery]bool? history=null)
         {
             using var connection = DBContext.GetConnection();
-            var sql = "SELECT * FROM Todo where completed=@history";
+
+              var  sql=$"SELECT * FROM todo {(history==null ? "" : "where completed=@history")}";
             var TodoDetails = connection.Query<Todo>(sql,new{history});
             return TodoDetails;
+         
+            
         }
 
 
@@ -34,9 +39,8 @@ namespace dotnet_practice.Controller
                 return BadRequest("Todo required");
             }
             using var connection=DBContext.GetConnection();
-            var sql="INSERT INTO Todo(id,task,completed,createdAt,completedAt)values(@Id,@Task,@Completed,@CreatedAt,@CompletedAt)";
+            var sql="INSERT INTO Todo(task,completed,createdAt,completedAt)values(@Task,@Completed,@CreatedAt,@CompletedAt)";
             var result=connection.Execute(sql,new{
-                id=todo.Id,
                 task=todo.Task,
                 completed=todo.Completed,
                 createdAt=todo.CreatedAt,
@@ -51,17 +55,18 @@ namespace dotnet_practice.Controller
 
         }
         [HttpPut]
-        [Route("Edit/{id}")]
-        public IActionResult UpdateTodo(int id,[FromBody]Todo todo){
+        [Route("UpdateTodo")]
+        public IActionResult UpdateTodo([FromBody]Todo todo){
             if(todo==null)
              return BadRequest("TodoDetails not found");
+             try{
+                Console.WriteLine(todo);
             using var connection=DBContext.GetConnection();
-            var sql="UPDATE Todo SET task=@task,completed=@completed,createdAt=@createdAt where id=@id";
+            var sql="UPDATE todo SET task=@task,completed=@completed,completedAt=@completedAt where id=@id";
             var result=connection.Execute(sql,new{
                 id=todo.Id,
                 task=todo.Task,
                 completed=todo.Completed,
-                createdAt=todo.CreatedAt,
                 completedAt=todo.CompletedAt
 
             });
@@ -70,22 +75,33 @@ namespace dotnet_practice.Controller
                 return Ok("Todo updated");
             }
             return StatusCode(500,"Failed to add todo");
-
+        }
+        catch(Exception ex){
+            return StatusCode(500,"Internal server error"+ex);
+        }
         }
         
 
         [HttpDelete]
-        [Route("Delete/{id}")]
-        public IActionResult DeleteTask(int id){
-                 using var connection=DBContext.GetConnection();
-                 var sql="DELETE FROM todo WHERE id=@id";
-                 var result=connection.Execute(sql,new{id=id});
+        [Route("DeleteTask/{Id}")]
+        public IActionResult DeleteTask(int Id){
+           // var StringId=Id.ToString();
+            try{
+                using var connection=DBContext.GetConnection();
+                 var sql="DELETE FROM todo WHERE id=@Id";
+                 var result=connection.Execute(sql,new
+                 { id=Id}
+                 );
                  if(result>0)
                  {
                     return Ok("Successfully deleted");
                  }
 
                  return NotFound("Todo not found");
+            }
+             catch(Exception ex){
+                return StatusCode(500,"Internal server error");
+             }    
         }
         
     }

@@ -30,8 +30,12 @@ namespace dotnet_practice.Controller
         public IActionResult GetById(int product_id){
             using var connection=DBContext.GetConnection();
             var sql="SELECT * FROM product where product_id=@product_id";
-            var result=connection.QuerySingle(sql,new{Product_Id=product_id});
-            return result;
+          
+            var result=connection.QuerySingleOrDefault<Product>(sql,new{Product_Id=product_id});
+            if(result==null)
+             return NotFound("Product not found");
+            return Ok(result);
+           
         }
 
         //insert api/products
