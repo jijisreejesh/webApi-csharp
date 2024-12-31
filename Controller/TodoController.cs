@@ -25,8 +25,21 @@ namespace dotnet_practice.Controller
               var  sql=$"SELECT * FROM todo {(history==null ? "" : "where completed=@history")}";
             var TodoDetails = connection.Query<Todo>(sql,new{history});
             return TodoDetails;
-         
-            
+        }
+
+
+        //GET single product
+        [HttpGet]
+        [Route("GetById/{Id}")]
+        public IActionResult GetById(int Id){
+            using var connection=DBContext.GetConnection();
+            var sql="SELECT * FROM todo where id=@id";
+          
+            var result=connection.QuerySingleOrDefault<Todo>(sql,new{id=Id});
+            if(result==null)
+             return NotFound("Product not found");
+            return Ok(result);
+           
         }
 
 
