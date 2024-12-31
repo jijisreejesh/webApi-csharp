@@ -37,3 +37,4 @@
 /home/user/jiji/dotnet-practice/bin/Debug/net8.0/package-lock.json
 /home/user/jiji/dotnet-practice/bin/Debug/net8.0/package.json
 /home/user/jiji/dotnet-practice/bin/Debug/net8.0/Dapper.dll
+/home/user/jiji/dotnet-practice/obj/Debug/net8.0/dotnet-practice.sourcelink.json

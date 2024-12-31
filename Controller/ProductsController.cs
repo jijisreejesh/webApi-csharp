@@ -24,6 +24,16 @@ namespace dotnet_practice.Controller
             return products;
         }
 
+        //GET single product
+        [HttpGet]
+        [Route("list/{product_id}")]
+        public IActionResult GetById(int product_id){
+            using var connection=DBContext.GetConnection();
+            var sql="SELECT * FROM product where product_id=@product_id";
+            var result=connection.QuerySingle(sql,new{Product_Id=product_id});
+            return result;
+        }
+
         //insert api/products
         [HttpPost]
         [Route("AddProduct")]
