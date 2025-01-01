@@ -18,7 +18,7 @@ namespace dotnet_practice.Controller
 
         [HttpGet]
         [Route("GetData")]
-        public IEnumerable<Todo> GetData([FromQuery] bool? history = null)
+        public IEnumerable<Todo> GetData([FromQuery]bool? history = null)
         {
             using var connection = DBContext.GetConnection();
 
